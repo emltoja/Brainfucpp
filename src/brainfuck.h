@@ -5,9 +5,6 @@
 *   DATE:    22.10.2023
 ***************************************************/
 
-
-#pragma once
-
 #ifndef BF_INTERPRETER
 #define BF_INTERPRETER
 
