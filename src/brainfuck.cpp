@@ -1,5 +1,6 @@
 /**************************************************
 *   PROJECT: Brainfuck interpreter written in C++
+*   FILE:    Interpreter cpp file
 *   AUTHOR:  Emil Olszewski
 *   DATE:    22.10.2023
 ***************************************************/
@@ -10,26 +11,18 @@
 #include <stack>
 #include <cassert>
 #include <map>
-
-//* Capital assert for better visibility
-#define ASSERT(expr) assert(expr)
-//* Brainfuck tape size
-#define MEM_SIZE 30000
+#include "brainfuck.h"
+                                      // V - r/l corresponding bracker position
 
 
-//* interpreter struct
-struct BFInterpreter {
-    char               memory[MEM_SIZE] = {0};
-    char               currentChar = 0;
-    int                memoryPointer = 0;
-    std::string        fileContents;
-    int                contentPointer = -1;
-    std::map<int, int> bracketPairs;            // K - l/r bracket position 
-};                                              // V - r/l corresponding bracker position
+//* Load string to interpreter buffer
+void loadInput(BFInterpreter* interpreter, std::string input) {
+    interpreter->inputBuffer = input;
+}
 
 
 //* Load source file to interpreter buffer
-int loadFileContents(BFInterpreter* interpreter, std::string path) {
+int loadFileContent(BFInterpreter* interpreter, std::string path) {
 
     std::ifstream file(path);
     std::string   line;
@@ -40,7 +33,7 @@ int loadFileContents(BFInterpreter* interpreter, std::string path) {
     }
 
     while (std::getline(file, line)) {
-        interpreter->fileContents += line + '\n';
+        interpreter->inputBuffer += line + '\n';
     }
 
     return 0;
@@ -48,8 +41,7 @@ int loadFileContents(BFInterpreter* interpreter, std::string path) {
 
 //* Advance to the next character in the buffer and read it
 char advance(BFInterpreter* interpreter) {
-    interpreter->contentPointer++;
-    interpreter->currentChar = interpreter->fileContents[interpreter->contentPointer];
+    interpreter->currentChar = interpreter->inputBuffer[++interpreter->contentPointer];
     return interpreter->currentChar;
 }
 
@@ -59,8 +51,8 @@ void loopLexing(BFInterpreter* interpreter) {
 
     std::stack<int> leftBrackets;
 
-    for (int i = 0; i < (int)interpreter->fileContents.length(); ++i) {
-        char current = interpreter->fileContents[i];
+    for (int i = 0; i < (int)interpreter->inputBuffer.length(); ++i) {
+        char current = interpreter->inputBuffer[i];
         if (current == '[') {
             leftBrackets.push(i);
         } else if (current == ']') {
@@ -80,32 +72,32 @@ char performAction(BFInterpreter* interpreter) {
 
     switch (interpreter->currentChar)
     {
-        case '>': // > - Increment pointer
+        case GT: // '>' - Increment pointer
             ASSERT(interpreter->memoryPointer < MEM_SIZE - 1);
             ++interpreter->memoryPointer;
             break;
-        case '<': // < - Decrement pointer
+        case LT: // '<' - Decrement pointer
             ASSERT(interpreter->memoryPointer > 0);
             --interpreter->memoryPointer;
             break;
-        case '+': // + - Increment at current position
+        case PLUS: // '+' - Increment at current position
             ++interpreter->memory[interpreter->memoryPointer];
             break;
-        case '-': // - - Decrement at current position
+        case MINUS: // '-' - Decrement at current position
             --interpreter->memory[interpreter->memoryPointer];
             break;
-        case '.': // . - Display at current position
+        case DOT: // '.' - Display at current position
             std::putchar(interpreter->memory[interpreter->memoryPointer]);
             break;    
-        case ',': // , - Get char and put at current position
+        case COMA: // ',' - Get char and put at current position
             interpreter->memory[interpreter->memoryPointer] = std::getchar();
             break;
-        case '[': // [ - Goto next ']' if at current position is 0
+        case LEFT_BRACKET: // '[' - Goto next ']' if at current position is 0
             if (!interpreter->memory[interpreter->memoryPointer]) {
                 interpreter->contentPointer = interpreter->bracketPairs[interpreter->contentPointer];
             }
             break;
-        case ']': // ] - Go back to the last '['
+        case RIGHT_BRACKET: // ']' - Go back to the last '['
             interpreter->contentPointer = interpreter->bracketPairs[interpreter->contentPointer] - 1;
             break;
         default:
@@ -115,32 +107,30 @@ char performAction(BFInterpreter* interpreter) {
     return advance(interpreter);
 }
 
-
-//* Run the interpretation of the given file
-//TODO: Implement REPL mode
-void run(BFInterpreter* interpreter, std::string path) {
-
-    loadFileContents(interpreter, path);
+//* Run the interpreter post setup
+void run(BFInterpreter* interpreter) {
+    
     loopLexing(interpreter);
 
     advance(interpreter);
-    while (interpreter->contentPointer != (int)interpreter->fileContents.length()) {
+    while(interpreter->memoryPointer != (int)interpreter->inputBuffer.length()) {
         performAction(interpreter);
     }
+}
 
+//* Run the terminal input
+void runTermInput(BFInterpreter* interpreter, std::string input) {
+
+    loadInput(interpreter, input);
+    run(interpreter);
 }
 
 
-//*Entry point
-int main(int argc, char** argv) {
+//* Run the interpretation of the given file
+//TODO: Implement REPL mode
+void runFile(BFInterpreter* interpreter, std::string path) {
 
-    if (argc == 1) {
-        std::cerr << "Provide path to the source file";
-        return 1;
-    }
-    BFInterpreter intp;
-
-    run(&intp, argv[1]);
-
-    return 0;
+    loadFileContent(interpreter, path);
+    run(interpreter);
+    
 }
