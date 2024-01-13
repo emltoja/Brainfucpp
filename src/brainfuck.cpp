@@ -111,11 +111,12 @@ char performAction(BFInterpreter* interpreter) {
 void run(BFInterpreter* interpreter) {
     
     loopLexing(interpreter);
-
     advance(interpreter);
-    while(interpreter->memoryPointer != (int)interpreter->inputBuffer.length()) {
+
+    while(interpreter->contentPointer != (int)interpreter->inputBuffer.length()) {
         performAction(interpreter);
     }
+
 }
 
 //* Run the terminal input
@@ -123,6 +124,7 @@ void runTermInput(BFInterpreter* interpreter, std::string input) {
 
     loadInput(interpreter, input);
     run(interpreter);
+
 }
 
 
@@ -132,5 +134,5 @@ void runFile(BFInterpreter* interpreter, std::string path) {
 
     loadFileContent(interpreter, path);
     run(interpreter);
-    
+
 }
