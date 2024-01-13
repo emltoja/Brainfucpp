@@ -1,6 +1,10 @@
 # Makefile
 CFLAGS= -Wall -Wextra
+BUILDTARGET= ./target/
+
+
 
 main:
 	@echo "Compiling..."
-	g++ .\src\brainfuck.cpp .\src\cli.cpp ${CFLAGS} -o .\target\brainfuck.exe
+	@test -d $(BUILDTARGET) || mkdir $(BUILDTARGET)
+	g++ ./src/brainfuck.cpp ./src/cli.cpp ${CFLAGS} -o ./target/brainfuck.exe
