@@ -3,4 +3,4 @@ CFLAGS= -Wall -Wextra
 
 main:
 	@echo "Compiling..."
-	g++ .\src\brainfuck.cpp ${CFLAGS} -o .\target\brainfuck.exe
+	g++ .\src\brainfuck.cpp .\src\cli.cpp ${CFLAGS} -o .\target\brainfuck.exe

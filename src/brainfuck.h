@@ -37,8 +37,8 @@ struct BFInterpreter {
 
 //* BF tokens enum
 
-#define  LT            '>'   // ">" - Increment pointer 
-#define  GT            '<'   // "<" - Decrement pointer 
+#define  GT            '>'   // ">" - Increment pointer 
+#define  LT            '<'   // "<" - Decrement pointer 
 #define  PLUS          '+'   // "+" - Increment value 
 #define  MINUS         '-'   // "-" - Decrement value 
 #define  DOT           '.'   // "." - Display value  
